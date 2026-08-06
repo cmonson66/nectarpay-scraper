@@ -61,6 +61,8 @@ const NAME_STOPWORDS = new Set([
   "Queen", "Creek", "Flagstaff", "Prescott", "Valley", "Street", "Avenue",
   "Our", "The", "New", "Best", "Contact", "About", "Privacy", "Terms",
   "Shipping", "Returns", "Google", "Facebook", "Instagram", "Yelp",
+  "Your", "Meet", "Team", "Press", "Site", "Privacy", "Legal",
+  "Events", "Repairs", "Services", "Staff", "Crew", "Family",
 ]);
 
 function cleanEmails(raw: string[]): string[] {
