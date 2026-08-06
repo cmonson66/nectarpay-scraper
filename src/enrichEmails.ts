@@ -31,11 +31,22 @@ const EMAIL_JUNK_LOCALS = new Set([
   "abuse", "postmaster", "webmaster", "hostmaster", "mailer-daemon",
 ]);
 
+
+// Email-derived names are only trusted when they're recognizably human.
+// (Business-y locals kept inventing new shapes — Zpace, Wubcoffee, Woxvqgsk —
+// so blocklists lost. Allowlist wins: unknown-but-real names just fall back
+// to the business greeting, which costs nothing.)
+const FIRST_NAMES = new Set(["aaron","abby","abigail","adam","adrian","aiden","al","alan","albert","alberto","alejandro","alex","alexa","alexander","alexis","alfred","alice","alicia","allen","allison","alyssa","amanda","amber","amy","ana","andre","andrea","andres","andrew","andy","angel","angela","angelica","angie","anita","ann","anna","anne","annette","annie","anthony","antonio","april","ariel","arnold","arthur","ashley","aubrey","austin","barb","barbara","barry","beatriz","becky","ben","benjamin","bernard","beth","bethany","betty","beverly","bill","billy","blake","bob","bobby","brad","bradley","brandi","brandon","brandy","brenda","brent","brett","brian","brianna","brittany","brooke","bruce","bryan","bryce","caitlin","caleb","calvin","cameron","camila","candice","carl","carla","carlos","carmen","carol","carole","carolina","caroline","carolyn","carrie","casey","cassandra","catherine","cathy","cecilia","cesar","chad","charlene","charles","charlie","charlotte","chase","chelsea","cheryl","chris","christian","christina","christine","christopher","christy","cindy","claire","clara","clarence","claudia","clay","clayton","clifford","clint","clinton","cody","cole","colin","colleen","connie","connor","corey","cory","courtney","craig","cristian","crystal","curtis","cynthia","dale","dallas","dalton","damian","damon","dan","dana","daniel","danielle","danny","darlene","darrell","darren","darryl","dave","david","dawn","dean","deanna","debbie","deborah","debra","denise","dennis","derek","derrick","desiree","destiny","devin","devon","diana","diane","diego","dillon","dominic","don","donald","donna","doris","dorothy","doug","douglas","drew","duane","dustin","dylan","earl","eben","ed","eddie","edgar","edith","eduardo","edward","edwin","elaine","eli","elias","elijah","elizabeth","ella","ellen","emily","emma","enrique","eric","erica","erik","erika","erin","ernest","esteban","esther","ethan","eugene","eva","evan","evelyn","everett","felipe","felix","fernando","frances","francis","francisco","frank","fred","freddie","gabriel","gabriela","gail","garrett","garry","gary","gavin","gene","geoffrey","george","gerald","gerardo","gilbert","gina","glen","glenn","gloria","gordon","grace","grant","greg","gregory","guadalupe","guillermo","gustavo","guy","hailey","haley","hannah","harold","harry","harvey","heather","hector","heidi","helen","henry","herbert","holly","hope","howard","hugo","hunter","ian","irene","iris","isaac","isabel","isaiah","ivan","jack","jackie","jackson","jacob","jacqueline","jaime","jake","james","jamie","jan","jana","jane","janet","janice","jared","jasmine","jason","javier","jay","jean","jeanette","jeff","jeffery","jeffrey","jenna","jennifer","jenny","jeremiah","jeremy","jerome","jerry","jesse","jessica","jesus","jill","jim","jimmy","joan","joann","joanna","joanne","joaquin","jodi","jody","joe","joel","joey","john","johnny","jon","jonathan","jordan","jorge","jose","josef","joseph","josh","joshua","josue","joy","joyce","juan","juanita","judith","judy","julia","julian","julie","julio","justin","kaitlyn","kara","karen","kari","karl","karla","kate","katelyn","katherine","kathleen","kathryn","kathy","katie","katrina","kay","kayla","keith","kelli","kellie","kelly","kelsey","ken","kendall","kendra","kenneth","kenny","kent","kevin","kim","kimberly","kirk","kris","krista","kristen","kristi","kristin","kristina","kristy","kurt","kyle","kylie","lance","larry","laura","lauren","laurie","lawrence","leah","lee","leo","leon","leonard","leonardo","leslie","levi","lewis","lily","linda","lindsay","lindsey","lisa","lloyd","logan","lois","lonnie","lorena","lori","lorraine","louis","louise","lucas","luis","luke","luz","lydia","lynn","mackenzie","madison","manuel","marc","marcia","marco","marcos","marcus","margaret","maria","mariah","marie","marilyn","mario","marion","marissa","mark","marlene","marsha","marshall","martha","martin","marvin","mary","mason","mathew","matt","matthew","maurice","max","maxwell","megan","melanie","melinda","melissa","melody","melvin","mercedes","meredith","micah","michael","micheal","michele","michelle","miguel","mike","mindy","miranda","miriam","misty","mitchell","molly","monica","morgan","nancy","naomi","natalie","natasha","nathan","nathaniel","neil","nelson","nicholas","nick","nicolas","nicole","nina","noah","noel","nora","norma","norman","oliver","olivia","omar","oscar","owen","pablo","paige","pam","pamela","pat","patricia","patrick","patti","paul","paula","pedro","peggy","penny","perry","pete","peter","phil","philip","phillip","phyllis","preston","priscilla","rachael","rachel","rafael","ralph","ramon","randall","randi","randy","raul","ray","raymond","rebecca","regina","reginald","renee","rex","rhonda","ricardo","richard","rick","ricky","rita","rob","robert","roberta","roberto","robin","robyn","rochelle","rocky","rodney","roger","roland","rolando","roman","ron","ronald","ronnie","rosa","rose","ross","roxanne","roy","ruben","ruby","russell","rusty","ruth","ryan","sabrina","sally","salvador","sam","samantha","samuel","sandra","sandy","santiago","sara","sarah","scott","sean","sebastian","sergio","seth","shane","shannon","sharon","shaun","shawn","sheila","shelby","shelia","shelley","shelly","sheri","sherri","sherry","shirley","sidney","sierra","simon","sonia","sonya","sophia","spencer","stacey","stacy","stan","stanley","stefanie","stephanie","stephen","steve","steven","stuart","sue","summer","susan","suzanne","sydney","sylvia","tabitha","tamara","tami","tammy","tanner","tanya","tara","taylor","ted","terence","teresa","teri","terrance","terrence","terri","terry","thelma","theodore","theresa","thomas","tiffany","tim","timothy","tina","toby","todd","tom","tommy","toni","tony","tonya","tracey","traci","tracy","travis","trent","trevor","trey","tricia","trisha","tristan","troy","tyler","tyrone","valerie","vanessa","vernon","veronica","vicki","vickie","victor","victoria","vincent","virginia","vivian","wade","walter","wanda","warren","wayne","weldon","wendy","wes","wesley","whitney","will","willa","william","willie","wilson","wyatt","xavier","yolanda","yvette","yvonne","zach","zachary","zack","zane","zoe"]);
+
+const JUNK_DOMAINS = /@(mailparser\.io|mailinator\.com|mailinater|tempmail|10minutemail|guerrillamail|yopmail|xxx\.xxx)/i;
+
 function isJunkEmail(email: string): boolean {
   const local = email.split("@")[0];
   if (EMAIL_JUNK_LOCALS.has(local)) return true;
   if (local.startsWith("your")) return true;
   if (local.includes("example")) return true;
+  if (JUNK_DOMAINS.test(email)) return true;
+  if (/^(x{2,}|test\d*)$/.test(local)) return true;
   return false;
 }
 
@@ -170,9 +181,9 @@ export function nameFromEmail(
 
   const bizNorm = businessName.toLowerCase().replace(/[^a-z]/g, "");
 
-  // first.last / first_last
+  // first.last / first_last — first token must be a recognizable name
   const two = /^([a-z]{2,12})[._]([a-z]{2,15})$/.exec(local);
-  if (two && !GENERIC_LOCALS.has(two[1]) && !GENERIC_LOCALS.has(two[2])) {
+  if (two && FIRST_NAMES.has(two[1]) && !GENERIC_LOCALS.has(two[2])) {
     return { first: cap(two[1]), last: cap(two[2]) };
   }
 
@@ -185,6 +196,7 @@ export function nameFromEmail(
     const overlaps =
       bizNorm.length >= 4 && (bizNorm.includes(local) || local.includes(bizNorm.slice(0, 6)));
     if (overlaps && !possessive) return null;
+    if (!FIRST_NAMES.has(local)) return null; // human names only
     return { first: cap(local), last: null };
   }
   return null;
