@@ -12,6 +12,7 @@ const FIELD_MASK = [
   "places.rating",
   "places.userRatingCount",
   "places.businessStatus",
+  "places.types",
   "nextPageToken",
 ].join(",");
 

@@ -20,6 +20,7 @@ export type PlaceResult = {
   rating?: number;
   userRatingCount?: number;
   businessStatus?: string;
+  types?: string[];
 };
 
 export type Lead = {

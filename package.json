@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "scrape": "tsx src/runScrape.ts",
+    "card": "tsx src/card.ts",
     "scrape:vertical": "tsx src/runScrape.ts --vertical",
     "typecheck": "tsc --noEmit"
   },
