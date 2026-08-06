@@ -1,0 +1,105 @@
+{
+  "cities": [
+    "Phoenix AZ",
+    "Scottsdale AZ",
+    "Tempe AZ",
+    "Mesa AZ",
+    "Chandler AZ",
+    "Gilbert AZ",
+    "Glendale AZ",
+    "Peoria AZ",
+    "Surprise AZ",
+    "Goodyear AZ",
+    "Avondale AZ",
+    "Queen Creek AZ",
+    "Tucson AZ",
+    "Flagstaff AZ",
+    "Prescott AZ"
+  ],
+  "verticals": [
+    {
+      "key": "smoke-vape",
+      "label": "Smoke / Vape / CBD",
+      "weight": 10,
+      "queries": ["smoke shop", "vape shop", "CBD store"]
+    },
+    {
+      "key": "tattoo",
+      "label": "Tattoo & Piercing",
+      "weight": 9,
+      "queries": ["tattoo shop", "piercing studio"]
+    },
+    {
+      "key": "firearms",
+      "label": "Gun Stores / FFL",
+      "weight": 9,
+      "queries": ["gun store", "firearms dealer"]
+    },
+    {
+      "key": "barber",
+      "label": "Barbershops",
+      "weight": 8,
+      "queries": ["barbershop", "barber shop"]
+    },
+    {
+      "key": "jewelry-gold",
+      "label": "Jewelry / Gold & Coin",
+      "weight": 8,
+      "queries": ["jewelry store", "gold and coin dealer", "pawn shop"]
+    },
+    {
+      "key": "auto",
+      "label": "Auto Repair / Detailing",
+      "weight": 7,
+      "queries": ["auto repair shop", "car detailing", "window tint shop"]
+    },
+    {
+      "key": "food-drink",
+      "label": "Restaurants / Bars / Coffee",
+      "weight": 6,
+      "queries": ["coffee shop", "bar", "food truck"]
+    },
+    {
+      "key": "kava-kratom",
+      "label": "Kava / Kratom Bars",
+      "weight": 10,
+      "queries": ["kava bar", "kratom shop", "kratom store"]
+    },
+    {
+      "key": "collectibles",
+      "label": "Cards / Collectibles / Games",
+      "weight": 9,
+      "queries": ["sports card shop", "trading card store", "comic book store"]
+    },
+    {
+      "key": "sneaker-street",
+      "label": "Sneaker / Streetwear Resale",
+      "weight": 9,
+      "queries": ["sneaker store", "streetwear store", "sneaker consignment"]
+    },
+    {
+      "key": "cigar-hookah",
+      "label": "Cigar / Hookah Lounges",
+      "weight": 8,
+      "queries": ["cigar lounge", "hookah lounge", "cigar shop"]
+    },
+    {
+      "key": "phone-repair",
+      "label": "Phone / Computer Repair",
+      "weight": 7,
+      "queries": ["phone repair shop", "computer repair shop"]
+    },
+    {
+      "key": "powersports",
+      "label": "Motorcycle / Powersports",
+      "weight": 7,
+      "queries": ["motorcycle dealer", "powersports dealer", "atv dealer"]
+    },
+    {
+      "key": "gym-supps",
+      "label": "Gyms / Supplements",
+      "weight": 6,
+      "queries": ["supplement store", "mma gym", "boxing gym"]
+    }
+  ]
+}

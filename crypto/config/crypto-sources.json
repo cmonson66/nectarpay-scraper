@@ -1,0 +1,193 @@
+{
+  "_comment": "Edit freely. Cities mirror the scraper's AZ sweep; radiusM is the Places locationBias radius (max 50000).",
+  "queries": [
+    "bitcoin atm",
+    "crypto atm",
+    "bitcoin machine",
+    "cryptocurrency exchange kiosk"
+  ],
+  "brandQueries": [
+    "Bitcoin Depot",
+    "CoinFlip bitcoin atm",
+    "Athena Bitcoin",
+    "RockItCoin",
+    "Bitstop",
+    "Byte Federal",
+    "Coinhub bitcoin atm"
+  ],
+  "cities": [
+    {
+      "name": "Phoenix",
+      "lat": 33.4484,
+      "lng": -112.074,
+      "radiusM": 30000
+    },
+    {
+      "name": "Mesa",
+      "lat": 33.4152,
+      "lng": -111.8315,
+      "radiusM": 18000
+    },
+    {
+      "name": "Chandler",
+      "lat": 33.3062,
+      "lng": -111.8413,
+      "radiusM": 15000
+    },
+    {
+      "name": "Gilbert",
+      "lat": 33.3528,
+      "lng": -111.789,
+      "radiusM": 15000
+    },
+    {
+      "name": "Glendale",
+      "lat": 33.5387,
+      "lng": -112.186,
+      "radiusM": 15000
+    },
+    {
+      "name": "Scottsdale",
+      "lat": 33.4942,
+      "lng": -111.9261,
+      "radiusM": 20000
+    },
+    {
+      "name": "Tempe",
+      "lat": 33.4255,
+      "lng": -111.94,
+      "radiusM": 12000
+    },
+    {
+      "name": "Peoria",
+      "lat": 33.5806,
+      "lng": -112.2374,
+      "radiusM": 18000
+    },
+    {
+      "name": "Surprise",
+      "lat": 33.6292,
+      "lng": -112.368,
+      "radiusM": 15000
+    },
+    {
+      "name": "Goodyear",
+      "lat": 33.4353,
+      "lng": -112.3576,
+      "radiusM": 15000
+    },
+    {
+      "name": "Avondale",
+      "lat": 33.4356,
+      "lng": -112.3496,
+      "radiusM": 12000
+    },
+    {
+      "name": "Buckeye",
+      "lat": 33.3703,
+      "lng": -112.5838,
+      "radiusM": 18000
+    },
+    {
+      "name": "Queen Creek",
+      "lat": 33.2487,
+      "lng": -111.6343,
+      "radiusM": 15000
+    },
+    {
+      "name": "Tucson",
+      "lat": 32.2226,
+      "lng": -110.9747,
+      "radiusM": 30000
+    },
+    {
+      "name": "Flagstaff",
+      "lat": 35.1983,
+      "lng": -111.6513,
+      "radiusM": 20000
+    },
+    {
+      "name": "Prescott",
+      "lat": 34.54,
+      "lng": -112.4685,
+      "radiusM": 25000
+    }
+  ],
+  "atmBrands": [
+    "america bitcoin",
+    "athena bitcoin",
+    "bitaccess",
+    "bitbox",
+    "bitcoin depot",
+    "bitcoin of america",
+    "bitcoin well",
+    "bitnational",
+    "bitstop",
+    "byte federal",
+    "cash2bitcoin",
+    "cdreload",
+    "coin cloud",
+    "coin flip",
+    "coin time bitcoin",
+    "coinflip",
+    "coinhub",
+    "coinme",
+    "coinmover",
+    "coinsource",
+    "crypto dispensers",
+    "cryptobase",
+    "digital cash 2 go",
+    "digitalmint",
+    "genesis coin",
+    "getcoins",
+    "hippo bitcoin",
+    "just digital coin",
+    "libertyx",
+    "national bitcoin atm",
+    "pelicoin",
+    "pocket bitcoin",
+    "remesa bitcoin",
+    "rockit coin",
+    "rockitcoin",
+    "sonoran bitcoin",
+    "unbank"
+  ],
+  "scoring": {
+    "radiusM": 2400,
+    "atmWeight": 1.0,
+    "merchantWeight": 2.5,
+    "falloffPower": 2,
+    "dedupeMeters": 80,
+    "counterServiceWeight": 0.6
+  },
+  "cryptoTokens": [
+    "bitcoin",
+    "btc",
+    "crypto",
+    "ethereum",
+    "litecoin",
+    "dogecoin",
+    "satoshi"
+  ],
+  "notCrypto": [
+    "coinstar",
+    "coin laundry",
+    "coin-op",
+    "coin op",
+    "coin wash",
+    "laundromat",
+    "rare coin",
+    "coin shop",
+    "numismatic",
+    "coin gallery",
+    "coin & jewelry",
+    "coin exchange inc"
+  ],
+  "counterServiceBrands": [
+    "coinme",
+    "cdreload",
+    "crypto dispensers",
+    "libertyx",
+    "coinstar"
+  ]
+}
