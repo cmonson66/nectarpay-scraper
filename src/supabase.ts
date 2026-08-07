@@ -21,19 +21,33 @@ export async function upsertLeads(
   const chunkSize = 200;
 
   // Vertical stability: a lead's FIRST vertical assignment is permanent.
-  // Expanded query packs overlap (a pawn+gun shop matches two verticals) —
-  // re-runs must refresh contact data without flipping cluster/copy/tags
-  // on leads already in the pipeline. Prefetch which ids exist.
-  const existing = new Set<string>();
+  // Implementation note (learned the hard way): bulk upserts need UNIFORM
+  // columns — omitting keys on some rows writes NULLs through ON CONFLICT
+  // and rolls the whole chunk back at the accounts trigger. So instead of
+  // omitting classification columns for known leads, we substitute their
+  // STORED values, keeping one uniform statement that can't null anything.
+  type Locked = {
+    vertical: string; vertical_label: string; band: string;
+    score: number; source_query: string;
+  };
+  const lockedByPlace = new Map<string, Locked>();
   const allIds = leads.map((l) => l.place_id);
   for (let i = 0; i < allIds.length; i += 500) {
     const { data } = await supabase
       .from("nectarpay_leads")
-      .select("place_id")
+      .select("place_id, vertical, vertical_label, band, score, source_query")
       .in("place_id", allIds.slice(i, i + 500));
-    for (const row of data ?? []) existing.add(row.place_id);
+    for (const row of data ?? []) {
+      lockedByPlace.set(row.place_id, {
+        vertical: row.vertical,
+        vertical_label: row.vertical_label,
+        band: row.band,
+        score: row.score,
+        source_query: row.source_query,
+      });
+    }
   }
-  console.log(`Upserting ${leads.length} leads (${existing.size} already known — verticals locked).`);
+  console.log(`Upserting ${leads.length} leads (${lockedByPlace.size} already known — verticals locked).`);
 
   for (let i = 0; i < leads.length; i += chunkSize) {
     const chunk = leads.slice(i, i + chunkSize).map((l) => ({
@@ -57,16 +71,13 @@ export async function upsertLeads(
         : {}),
       rating: l.rating,
       review_count: l.review_count,
-      // New leads get the full classification; known leads keep theirs
-      ...(existing.has(l.place_id)
-        ? {}
-        : {
-            vertical: l.vertical,
-            vertical_label: l.vertical_label,
-            source_query: l.source_query,
-            score: l.score,
-            band: l.band,
-          }),
+      // Known leads re-assert their stored classification (uniform columns,
+      // nothing can go null); new leads land with the fresh one
+      vertical: lockedByPlace.get(l.place_id)?.vertical ?? l.vertical,
+      vertical_label: lockedByPlace.get(l.place_id)?.vertical_label ?? l.vertical_label,
+      source_query: lockedByPlace.get(l.place_id)?.source_query ?? l.source_query,
+      score: lockedByPlace.get(l.place_id)?.score ?? l.score,
+      band: lockedByPlace.get(l.place_id)?.band ?? l.band,
       scraped_at: l.scraped_at,
     }));
 

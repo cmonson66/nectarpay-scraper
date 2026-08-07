@@ -17,6 +17,12 @@ const HEADERS = [
   "source_query",
   "place_id",
   "scraped_at",
+  "vertical_key",
+  "latitude",
+  "longitude",
+  "owner_first",
+  "owner_last",
+  "owner_source",
 ];
 
 function esc(v: string | number | null): string {
@@ -42,6 +48,12 @@ export function writeCsv(path: string, leads: Lead[]): void {
       l.source_query,
       l.place_id,
       l.scraped_at,
+      l.vertical,
+      l.latitude ?? "",
+      l.longitude ?? "",
+      l.owner_first_name ?? "",
+      l.owner_last_name ?? "",
+      l.owner_name_source ?? "",
     ]
       .map(esc)
       .join(",")
