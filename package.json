@@ -8,6 +8,7 @@
     "scrape": "tsx src/runScrape.ts",
     "card": "tsx src/card.ts",
     "import": "tsx src/import.ts",
+    "match-crypto": "tsx src/match-crypto.ts",
     "scrape:vertical": "tsx src/runScrape.ts --vertical",
     "typecheck": "tsc --noEmit"
   },
