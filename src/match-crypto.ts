@@ -223,6 +223,13 @@ async function main() {
     }
   }
 
+  // Bridge the flag to CRM accounts (031 defines the function)
+  if (!DRY) {
+    const { data: synced, error: syncErr } = await supabase.rpc("sync_crypto_native");
+    if (syncErr) console.error("  ! sync_crypto_native failed:", syncErr.message);
+    else console.log(`CRM accounts flagged: ${synced}`);
+  }
+
   mkdirSync(join(ROOT, "out"), { recursive: true });
   writeFileSync(join(ROOT, "out", "crypto-match-review.csv"), review.join("\n"), "utf8");
   console.log(
