@@ -14,92 +14,287 @@
     "Queen Creek AZ",
     "Tucson AZ",
     "Flagstaff AZ",
-    "Prescott AZ"
+    "Prescott AZ",
+    "Anthem AZ",
+    "Cave Creek AZ",
+    "Fountain Hills AZ",
+    "Buckeye AZ",
+    "Litchfield Park AZ",
+    "Maricopa AZ",
+    "Casa Grande AZ",
+    "Apache Junction AZ",
+    "San Tan Valley AZ",
+    "Oro Valley AZ",
+    "Marana AZ",
+    "Yuma AZ",
+    "Lake Havasu City AZ",
+    "Prescott Valley AZ",
+    "Sierra Vista AZ",
+    "Kingman AZ",
+    "Sedona AZ"
   ],
   "verticals": [
     {
       "key": "smoke-vape",
       "label": "Smoke / Vape / CBD",
       "weight": 10,
-      "queries": ["smoke shop", "vape shop", "CBD store"]
+      "queries": [
+        "smoke shop",
+        "vape shop",
+        "CBD store",
+        "head shop",
+        "hookah store",
+        "delta 8 store"
+      ]
+    },
+    {
+      "key": "kava-kratom",
+      "label": "Kava / Kratom",
+      "weight": 10,
+      "queries": [
+        "kava bar",
+        "kratom store",
+        "kratom shop"
+      ]
     },
     {
       "key": "tattoo",
       "label": "Tattoo & Piercing",
       "weight": 9,
-      "queries": ["tattoo shop", "piercing studio"]
+      "queries": [
+        "tattoo shop",
+        "piercing studio",
+        "tattoo studio",
+        "microblading studio"
+      ]
     },
     {
       "key": "firearms",
-      "label": "Gun Stores / FFL",
+      "label": "Firearms",
       "weight": 9,
-      "queries": ["gun store", "firearms dealer"]
+      "queries": [
+        "gun store",
+        "gun shop",
+        "firearms dealer",
+        "ammo store",
+        "gunsmith"
+      ]
+    },
+    {
+      "key": "collectibles",
+      "label": "Collectibles / Cards",
+      "weight": 9,
+      "queries": [
+        "sports cards shop",
+        "comic book store",
+        "trading card shop",
+        "collectibles store",
+        "game store"
+      ]
+    },
+    {
+      "key": "sneaker-street",
+      "label": "Sneakers / Streetwear",
+      "weight": 9,
+      "queries": [
+        "sneaker store",
+        "streetwear store",
+        "sneaker consignment"
+      ]
     },
     {
       "key": "barber",
       "label": "Barbershops",
       "weight": 8,
-      "queries": ["barbershop", "barber shop"]
+      "queries": [
+        "barbershop",
+        "barber shop",
+        "fades barbershop"
+      ]
     },
     {
       "key": "jewelry-gold",
-      "label": "Jewelry / Gold & Coin",
+      "label": "Jewelry / Gold / Coin",
       "weight": 8,
-      "queries": ["jewelry store", "gold and coin dealer", "pawn shop"]
-    },
-    {
-      "key": "auto",
-      "label": "Auto Repair / Detailing",
-      "weight": 7,
-      "queries": ["auto repair shop", "car detailing", "window tint shop"]
-    },
-    {
-      "key": "food-drink",
-      "label": "Restaurants / Bars / Coffee",
-      "weight": 6,
-      "queries": ["coffee shop", "bar", "food truck"]
-    },
-    {
-      "key": "kava-kratom",
-      "label": "Kava / Kratom Bars",
-      "weight": 10,
-      "queries": ["kava bar", "kratom shop", "kratom store"]
-    },
-    {
-      "key": "collectibles",
-      "label": "Cards / Collectibles / Games",
-      "weight": 9,
-      "queries": ["sports card shop", "trading card store", "comic book store"]
-    },
-    {
-      "key": "sneaker-street",
-      "label": "Sneaker / Streetwear Resale",
-      "weight": 9,
-      "queries": ["sneaker store", "streetwear store", "sneaker consignment"]
+      "queries": [
+        "jewelry store",
+        "gold buyer",
+        "coin shop",
+        "bullion dealer"
+      ]
     },
     {
       "key": "cigar-hookah",
-      "label": "Cigar / Hookah Lounges",
+      "label": "Cigar / Hookah",
       "weight": 8,
-      "queries": ["cigar lounge", "hookah lounge", "cigar shop"]
+      "queries": [
+        "cigar shop",
+        "cigar lounge",
+        "hookah lounge",
+        "tobacco shop"
+      ]
+    },
+    {
+      "key": "pawn",
+      "label": "Pawn / Loan",
+      "weight": 8,
+      "queries": [
+        "pawn shop",
+        "pawn and gun",
+        "jewelry and loan",
+        "gold and pawn"
+      ]
+    },
+    {
+      "key": "gaming",
+      "label": "Gaming / Esports",
+      "weight": 8,
+      "queries": [
+        "gaming lounge",
+        "esports center",
+        "LAN center",
+        "arcade bar",
+        "video game store"
+      ]
+    },
+    {
+      "key": "adult-retail",
+      "label": "Adult Retail",
+      "weight": 8,
+      "queries": [
+        "adult store",
+        "adult novelty store",
+        "lingerie boutique"
+      ]
+    },
+    {
+      "key": "auto",
+      "label": "Auto Services",
+      "weight": 7,
+      "queries": [
+        "auto repair shop",
+        "window tinting",
+        "car detailing",
+        "car audio shop",
+        "vehicle wraps",
+        "ceramic coating"
+      ]
     },
     {
       "key": "phone-repair",
       "label": "Phone / Computer Repair",
       "weight": 7,
-      "queries": ["phone repair shop", "computer repair shop"]
+      "queries": [
+        "phone repair",
+        "cell phone repair",
+        "computer repair",
+        "screen repair"
+      ]
     },
     {
       "key": "powersports",
-      "label": "Motorcycle / Powersports",
+      "label": "Powersports",
       "weight": 7,
-      "queries": ["motorcycle dealer", "powersports dealer", "atv dealer"]
+      "queries": [
+        "powersports dealer",
+        "motorcycle shop",
+        "ATV dealer",
+        "dirt bike shop"
+      ]
+    },
+    {
+      "key": "med-spa",
+      "label": "Med Spa / Wellness",
+      "weight": 7,
+      "queries": [
+        "med spa",
+        "medical spa",
+        "IV therapy",
+        "cryotherapy",
+        "aesthetics clinic"
+      ]
+    },
+    {
+      "key": "thrift-vintage",
+      "label": "Thrift / Vintage",
+      "weight": 7,
+      "queries": [
+        "thrift store",
+        "vintage clothing store",
+        "consignment shop",
+        "resale boutique"
+      ]
+    },
+    {
+      "key": "food-drink",
+      "label": "Food & Drink",
+      "weight": 6,
+      "queries": [
+        "restaurant",
+        "coffee shop",
+        "brewery",
+        "taproom",
+        "juice bar",
+        "boba tea shop",
+        "food truck"
+      ]
     },
     {
       "key": "gym-supps",
       "label": "Gyms / Supplements",
       "weight": 6,
-      "queries": ["supplement store", "mma gym", "boxing gym"]
+      "queries": [
+        "gym",
+        "supplement store",
+        "crossfit gym",
+        "boxing gym",
+        "muay thai gym",
+        "nutrition store"
+      ]
+    },
+    {
+      "key": "nail-beauty",
+      "label": "Nails / Beauty",
+      "weight": 6,
+      "queries": [
+        "nail salon",
+        "lash studio",
+        "brow studio",
+        "waxing salon",
+        "beauty studio"
+      ]
+    },
+    {
+      "key": "pool-landscape",
+      "label": "Pool / Landscape",
+      "weight": 6,
+      "queries": [
+        "pool service",
+        "pool cleaning",
+        "landscaping company",
+        "tree service",
+        "lawn care"
+      ]
+    },
+    {
+      "key": "liquor",
+      "label": "Liquor Stores",
+      "weight": 6,
+      "queries": [
+        "liquor store",
+        "wine and spirits",
+        "bottle shop"
+      ]
+    },
+    {
+      "key": "bike",
+      "label": "Bikes / E-Bikes",
+      "weight": 6,
+      "queries": [
+        "bike shop",
+        "e-bike store",
+        "bicycle repair"
+      ]
     }
   ]
 }

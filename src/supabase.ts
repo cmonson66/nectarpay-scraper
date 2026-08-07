@@ -20,6 +20,21 @@ export async function upsertLeads(
   const supabase = createClient(url, key);
   const chunkSize = 200;
 
+  // Vertical stability: a lead's FIRST vertical assignment is permanent.
+  // Expanded query packs overlap (a pawn+gun shop matches two verticals) —
+  // re-runs must refresh contact data without flipping cluster/copy/tags
+  // on leads already in the pipeline. Prefetch which ids exist.
+  const existing = new Set<string>();
+  const allIds = leads.map((l) => l.place_id);
+  for (let i = 0; i < allIds.length; i += 500) {
+    const { data } = await supabase
+      .from("nectarpay_leads")
+      .select("place_id")
+      .in("place_id", allIds.slice(i, i + 500));
+    for (const row of data ?? []) existing.add(row.place_id);
+  }
+  console.log(`Upserting ${leads.length} leads (${existing.size} already known — verticals locked).`);
+
   for (let i = 0; i < leads.length; i += chunkSize) {
     const chunk = leads.slice(i, i + chunkSize).map((l) => ({
       place_id: l.place_id,
@@ -42,11 +57,16 @@ export async function upsertLeads(
         : {}),
       rating: l.rating,
       review_count: l.review_count,
-      vertical: l.vertical,
-      vertical_label: l.vertical_label,
-      source_query: l.source_query,
-      score: l.score,
-      band: l.band,
+      // New leads get the full classification; known leads keep theirs
+      ...(existing.has(l.place_id)
+        ? {}
+        : {
+            vertical: l.vertical,
+            vertical_label: l.vertical_label,
+            source_query: l.source_query,
+            score: l.score,
+            band: l.band,
+          }),
       scraped_at: l.scraped_at,
     }));
 

@@ -53,6 +53,15 @@ const NAME_MAP: [RegExp, string][] = [
   [/tint|detail|auto|car care|glass/i, "auto"],
   [/motorcycle|powersport|atv|utv/i, "powersports"],
   [/gym|muay|jiu|boxing|crossfit|supplement|nutrition/i, "gym-supps"],
+  [/pawn|loan\b/i, "pawn"],
+  [/nail|lash|brow|wax(ing)?\b/i, "nail-beauty"],
+  [/med\s?spa|iv\s?(therapy|drip)|cryo|aesthetic/i, "med-spa"],
+  [/pool|landscap|tree service|lawn/i, "pool-landscape"],
+  [/liquor|wine|spirits|bottle shop/i, "liquor"],
+  [/gaming|esports|arcade|lan center/i, "gaming"],
+  [/thrift|vintage|consign|resale/i, "thrift-vintage"],
+  [/\bbike|bicycle|e-?bike/i, "bike"],
+  [/adult|lingerie/i, "adult-retail"],
   [/bar\b|grill|tavern|pub|coffee|cafe|brew/i, "food-drink"],
 ];
 
