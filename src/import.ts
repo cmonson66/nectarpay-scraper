@@ -14,6 +14,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import { upsertLeads } from "./supabase.js";
+import { resolveRegionId } from "./regions.js";
 import type { Lead, Targets } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -71,8 +72,22 @@ async function main() {
   }
 
   const targets: Targets = JSON.parse(readFileSync(join(ROOT, "config", "targets.json"), "utf8"));
+
+  // A CSV has no idea which market it came from, so the region is declared
+  // rather than guessed:  npm run import -- leads.csv --region DFW
+  const ri = process.argv.indexOf("--region");
+  const regionCode = ri >= 0 && process.argv[ri + 1] ? process.argv[ri + 1] : "PHX";
+  const regionTarget = targets.regions.find((r) => r.code.toLowerCase() === regionCode.toLowerCase());
+  if (!regionTarget) {
+    console.error(`No region "${regionCode}". Known: ${targets.regions.map((r) => r.code).join(", ")}`);
+    process.exit(1);
+  }
+  const regionId = await resolveRegionId(regionTarget);
+  console.log(`Importing into ${regionTarget.name} (${regionTarget.code}).`);
   const keyByLabel = new Map(targets.verticals.map((v) => [v.label, v.key]));
   const labelByKey = new Map(targets.verticals.map((v) => [v.key, v.label]));
+  const holdByVertical = new Map(targets.verticals.map((v) => [v.key, v.compliance_hold === true]));
+  const reasonByVertical = new Map(targets.verticals.map((v) => [v.key, v.compliance_reason ?? null]));
 
   const rows = parseCsv(readFileSync(csvPath, "utf8"));
   const headers = rows[0];
@@ -131,6 +146,9 @@ async function main() {
       score: r[c.score] ? Number(r[c.score]) : 0,
       band: (r[c.band] as Lead["band"]) || "COOL",
       scraped_at: r[c.scraped] || new Date().toISOString(),
+      region_id: regionId,
+      compliance_hold: holdByVertical.get(vkey) ?? false,
+      compliance_reason: holdByVertical.get(vkey) ? (reasonByVertical.get(vkey) ?? "Restricted vertical") : null,
     });
   }
   console.log(`Parsed ${leads.length} leads from CSV (${skipped} rows skipped).`);

@@ -1,37 +1,83 @@
 {
-  "cities": [
-    "Phoenix AZ",
-    "Scottsdale AZ",
-    "Tempe AZ",
-    "Mesa AZ",
-    "Chandler AZ",
-    "Gilbert AZ",
-    "Glendale AZ",
-    "Peoria AZ",
-    "Surprise AZ",
-    "Goodyear AZ",
-    "Avondale AZ",
-    "Queen Creek AZ",
-    "Tucson AZ",
-    "Flagstaff AZ",
-    "Prescott AZ",
-    "Anthem AZ",
-    "Cave Creek AZ",
-    "Fountain Hills AZ",
-    "Buckeye AZ",
-    "Litchfield Park AZ",
-    "Maricopa AZ",
-    "Casa Grande AZ",
-    "Apache Junction AZ",
-    "San Tan Valley AZ",
-    "Oro Valley AZ",
-    "Marana AZ",
-    "Yuma AZ",
-    "Lake Havasu City AZ",
-    "Prescott Valley AZ",
-    "Sierra Vista AZ",
-    "Kingman AZ",
-    "Sedona AZ"
+  "regions": [
+    {
+      "code": "PHX",
+      "name": "Phoenix",
+      "state": "AZ",
+      "cities": [
+        "Phoenix AZ",
+        "Scottsdale AZ",
+        "Tempe AZ",
+        "Mesa AZ",
+        "Chandler AZ",
+        "Gilbert AZ",
+        "Glendale AZ",
+        "Peoria AZ",
+        "Surprise AZ",
+        "Goodyear AZ",
+        "Avondale AZ",
+        "Queen Creek AZ",
+        "Tucson AZ",
+        "Flagstaff AZ",
+        "Prescott AZ",
+        "Anthem AZ",
+        "Cave Creek AZ",
+        "Fountain Hills AZ",
+        "Buckeye AZ",
+        "Litchfield Park AZ",
+        "Maricopa AZ",
+        "Casa Grande AZ",
+        "Apache Junction AZ",
+        "San Tan Valley AZ",
+        "Oro Valley AZ",
+        "Marana AZ",
+        "Yuma AZ",
+        "Lake Havasu City AZ",
+        "Prescott Valley AZ",
+        "Sierra Vista AZ",
+        "Kingman AZ",
+        "Sedona AZ"
+      ]
+    },
+    {
+      "code": "DFW",
+      "name": "Dallas / Fort Worth",
+      "state": "TX",
+      "cities": [
+        "Dallas TX",
+        "Fort Worth TX",
+        "Arlington TX",
+        "Plano TX",
+        "Irving TX",
+        "Garland TX",
+        "Frisco TX",
+        "McKinney TX",
+        "Grand Prairie TX",
+        "Mesquite TX",
+        "Carrollton TX",
+        "Denton TX",
+        "Richardson TX",
+        "Lewisville TX",
+        "Allen TX",
+        "Flower Mound TX",
+        "North Richland Hills TX",
+        "Mansfield TX",
+        "Rowlett TX",
+        "Euless TX",
+        "Bedford TX",
+        "Grapevine TX",
+        "Cedar Hill TX",
+        "DeSoto TX",
+        "Wylie TX",
+        "Keller TX",
+        "Coppell TX",
+        "Hurst TX",
+        "Duncanville TX",
+        "Little Elm TX",
+        "Burleson TX",
+        "Waxahachie TX"
+      ]
+    }
   ],
   "verticals": [
     {
@@ -45,7 +91,9 @@
         "head shop",
         "hookah store",
         "delta 8 store"
-      ]
+      ],
+      "compliance_hold": true,
+      "compliance_reason": "THC-adjacent retail - restricted by Plaid"
     },
     {
       "key": "kava-kratom",
@@ -55,7 +103,9 @@
         "kava bar",
         "kratom store",
         "kratom shop"
-      ]
+      ],
+      "compliance_hold": true,
+      "compliance_reason": "THC-adjacent retail - restricted by Plaid"
     },
     {
       "key": "tattoo",
@@ -66,7 +116,8 @@
         "piercing studio",
         "tattoo studio",
         "microblading studio"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "firearms",
@@ -78,7 +129,8 @@
         "firearms dealer",
         "ammo store",
         "gunsmith"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "collectibles",
@@ -90,7 +142,8 @@
         "trading card shop",
         "collectibles store",
         "game store"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "sneaker-street",
@@ -100,7 +153,8 @@
         "sneaker store",
         "streetwear store",
         "sneaker consignment"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "barber",
@@ -110,7 +164,8 @@
         "barbershop",
         "barber shop",
         "fades barbershop"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "jewelry-gold",
@@ -121,7 +176,8 @@
         "gold buyer",
         "coin shop",
         "bullion dealer"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "cigar-hookah",
@@ -132,7 +188,8 @@
         "cigar lounge",
         "hookah lounge",
         "tobacco shop"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "pawn",
@@ -143,7 +200,8 @@
         "pawn and gun",
         "jewelry and loan",
         "gold and pawn"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "gaming",
@@ -155,7 +213,8 @@
         "LAN center",
         "arcade bar",
         "video game store"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "adult-retail",
@@ -165,7 +224,9 @@
         "adult store",
         "adult novelty store",
         "lingerie boutique"
-      ]
+      ],
+      "compliance_hold": true,
+      "compliance_reason": "Adult retail - restricted by Plaid"
     },
     {
       "key": "auto",
@@ -178,7 +239,8 @@
         "car audio shop",
         "vehicle wraps",
         "ceramic coating"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "phone-repair",
@@ -189,7 +251,8 @@
         "cell phone repair",
         "computer repair",
         "screen repair"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "powersports",
@@ -200,7 +263,8 @@
         "motorcycle shop",
         "ATV dealer",
         "dirt bike shop"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "med-spa",
@@ -212,7 +276,8 @@
         "IV therapy",
         "cryotherapy",
         "aesthetics clinic"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "thrift-vintage",
@@ -223,7 +288,8 @@
         "vintage clothing store",
         "consignment shop",
         "resale boutique"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "food-drink",
@@ -237,7 +303,8 @@
         "juice bar",
         "boba tea shop",
         "food truck"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "gym-supps",
@@ -250,7 +317,8 @@
         "boxing gym",
         "muay thai gym",
         "nutrition store"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "nail-beauty",
@@ -262,7 +330,8 @@
         "brow studio",
         "waxing salon",
         "beauty studio"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "pool-landscape",
@@ -274,7 +343,8 @@
         "landscaping company",
         "tree service",
         "lawn care"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "liquor",
@@ -284,7 +354,8 @@
         "liquor store",
         "wine and spirits",
         "bottle shop"
-      ]
+      ],
+      "compliance_hold": false
     },
     {
       "key": "bike",
@@ -294,7 +365,8 @@
         "bike shop",
         "e-bike store",
         "bicycle repair"
-      ]
+      ],
+      "compliance_hold": false
     }
   ]
 }

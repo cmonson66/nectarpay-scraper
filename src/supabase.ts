@@ -26,16 +26,22 @@ export async function upsertLeads(
   // and rolls the whole chunk back at the accounts trigger. So instead of
   // omitting classification columns for known leads, we substitute their
   // STORED values, keeping one uniform statement that can't null anything.
+  // region_id and compliance_hold join the locked set for the same reason
+  // vertical did, plus one of their own: a human may have CLEARED a hold in
+  // the CRM after checking a shop, and a re-scrape must not silently put it
+  // back. First assignment wins; changes are a person's decision, not a
+  // scraper's.
   type Locked = {
     vertical: string; vertical_label: string; band: string;
     score: number; source_query: string;
+    region_id: string | null; compliance_hold: boolean; compliance_reason: string | null;
   };
   const lockedByPlace = new Map<string, Locked>();
   const allIds = leads.map((l) => l.place_id);
   for (let i = 0; i < allIds.length; i += 500) {
     const { data } = await supabase
       .from("nectarpay_leads")
-      .select("place_id, vertical, vertical_label, band, score, source_query")
+      .select("place_id, vertical, vertical_label, band, score, source_query, region_id, compliance_hold, compliance_reason")
       .in("place_id", allIds.slice(i, i + 500));
     for (const row of data ?? []) {
       lockedByPlace.set(row.place_id, {
@@ -44,6 +50,9 @@ export async function upsertLeads(
         band: row.band,
         score: row.score,
         source_query: row.source_query,
+        region_id: row.region_id,
+        compliance_hold: row.compliance_hold,
+        compliance_reason: row.compliance_reason,
       });
     }
   }
@@ -78,6 +87,11 @@ export async function upsertLeads(
       source_query: lockedByPlace.get(l.place_id)?.source_query ?? l.source_query,
       score: lockedByPlace.get(l.place_id)?.score ?? l.score,
       band: lockedByPlace.get(l.place_id)?.band ?? l.band,
+      // Uniform columns, same rule as above: every row carries these keys or
+      // ON CONFLICT writes NULLs through and the chunk rolls back.
+      region_id: lockedByPlace.get(l.place_id)?.region_id ?? l.region_id,
+      compliance_hold: lockedByPlace.get(l.place_id)?.compliance_hold ?? l.compliance_hold,
+      compliance_reason: lockedByPlace.get(l.place_id)?.compliance_reason ?? l.compliance_reason,
       scraped_at: l.scraped_at,
     }));
 
@@ -88,4 +102,14 @@ export async function upsertLeads(
     if (error) console.error("  ! Supabase upsert error:", error.message);
   }
   console.log(`Supabase upsert complete (${leads.length} leads).`);
+
+  // Nothing should ever land without a region. If it did, those rows are
+  // invisible to every campaign and every manager, and nobody would notice.
+  const { count } = await supabase
+    .from("nectarpay_leads")
+    .select("place_id", { count: "exact", head: true })
+    .is("region_id", null);
+  if ((count ?? 0) > 0) {
+    console.error(`  ! ${count} leads in the pool have NO region and will never be emailed.`);
+  }
 }

@@ -16,6 +16,7 @@ import { createClient } from "@supabase/supabase-js";
 import { textSearch } from "./places.js";
 import { harvestSite } from "./enrichEmails.js";
 import { scoreLead, verticalWeightCache } from "./score.js";
+import { resolveRegionId } from "./regions.js";
 import type { Targets, Lead } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -80,8 +81,9 @@ function flagValue(argv: string[], name: string): string | null {
 async function main() {
   const argv = process.argv.slice(2);
   const vertOverride = flagValue(argv, "vertical");
+  const regionCode = flagValue(argv, "region") ?? "PHX";
   const pick = Number(flagValue(argv, "pick") ?? "1");
-  const flagVals = new Set([vertOverride, flagValue(argv, "pick")].filter(Boolean));
+  const flagVals = new Set([vertOverride, flagValue(argv, "pick"), flagValue(argv, "region")].filter(Boolean));
   const args = argv.filter((a) => !a.startsWith("--") && !flagVals.has(a));
   if (args.length < 2) {
     console.error('Usage: npm run card -- "Business Name" "City AZ" [--vertical key] [--pick N]');
@@ -101,6 +103,16 @@ async function main() {
 
   const targets: Targets = JSON.parse(readFileSync(join(ROOT, "config", "targets.json"), "utf8"));
   for (const v of targets.verticals) verticalWeightCache.set(v.key, v.weight);
+
+  // A manual prospect still needs a home. Default PHX, override with
+  // --region DFW. A NULL region would make the lead invisible to every
+  // campaign and every manager, which is worse than a wrong region.
+  const regionTarget = targets.regions.find((r) => r.code.toLowerCase() === regionCode.toLowerCase());
+  if (!regionTarget) {
+    console.error(`No region "${regionCode}". Known: ${targets.regions.map((r) => r.code).join(", ")}`);
+    process.exit(1);
+  }
+  const regionId = await resolveRegionId(regionTarget);
   const labelFor = (key: string) =>
     targets.verticals.find((v) => v.key === key)?.label ?? key;
 
@@ -190,6 +202,9 @@ async function main() {
     vertical_label: labelFor(vertical),
     source_query: "manual: Eric prospect",
     scraped_at: new Date().toISOString(),
+    region_id: regionId,
+    compliance_hold: false,
+    compliance_reason: null,
   };
 
   const { error } = await supabase.from("nectarpay_leads").insert({

@@ -3,10 +3,22 @@ export type Vertical = {
   label: string;
   weight: number;
   queries: string[];
+  /** Applied AT INGEST. A held lead is never emailed by the campaign. */
+  compliance_hold?: boolean;
+  compliance_reason?: string;
+};
+
+export type RegionTarget = {
+  /** Must match regions.code in the CRM database. */
+  code: string;
+  name: string;
+  /** Two-letter state, used to reject the wrong Peoria. */
+  state: string;
+  cities: string[];
 };
 
 export type Targets = {
-  cities: string[];
+  regions: RegionTarget[];
   verticals: Vertical[];
 };
 
@@ -44,4 +56,9 @@ export type Lead = {
   score: number;
   band: "HOT" | "WARM" | "COOL";
   scraped_at: string;
+  /** regions.id in the CRM. A NULL region is invisible to that region's
+   *  campaign and to its manager, so this is resolved before any search runs. */
+  region_id: string;
+  compliance_hold: boolean;
+  compliance_reason: string | null;
 };

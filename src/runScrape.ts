@@ -7,28 +7,35 @@ import { harvestSite, nameFromEmail } from "./enrichEmails.js";
 import { scoreLead, assignBands, verticalWeightCache } from "./score.js";
 import { writeCsv } from "./csv.js";
 import { upsertLeads } from "./supabase.js";
+import { resolveRegionId } from "./regions.js";
 import type { Targets, Lead } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 
 // --- CLI flags ---------------------------------------------------------
-// npm run scrape                          -> all verticals, all cities
-// npm run scrape -- --vertical smoke-vape -> one vertical
-// npm run scrape -- --city "Tempe AZ"     -> one city
-// npm run scrape -- --no-emails           -> skip site enrichment (fast pass)
+// --region is REQUIRED. There is no default: a scrape that guesses which
+// market it is filling is how Fort Worth shops end up in Eric's Phoenix book.
+//
+// npm run scrape -- --region PHX                        -> all verticals, all cities
+// npm run scrape -- --region DFW --vertical barber      -> one vertical
+// npm run scrape -- --region DFW --city "Plano TX"      -> one city
+// npm run scrape -- --region DFW --dry-run              -> cost estimate, no API calls
+// npm run scrape -- --region PHX --no-emails            -> skip site enrichment
 const argv = process.argv.slice(2);
 function flagValue(name: string): string | null {
   const i = argv.indexOf(`--${name}`);
   return i >= 0 && argv[i + 1] ? argv[i + 1] : null;
 }
+const regionCode = flagValue("region");
 const onlyVertical = flagValue("vertical");
 const onlyCity = flagValue("city");
 const skipEnrich = argv.includes("--no-emails");
+const dryRun = argv.includes("--dry-run");
 
 async function main() {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-  if (!apiKey) {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY ?? "";
+  if (!apiKey && !dryRun) {
     console.error("Missing GOOGLE_PLACES_API_KEY in .env");
     process.exit(1);
   }
@@ -37,17 +44,51 @@ async function main() {
     readFileSync(join(ROOT, "config", "targets.json"), "utf8")
   );
 
+  if (!regionCode) {
+    console.error(`--region is required. Known: ${targets.regions.map((r) => r.code).join(", ")}`);
+    process.exit(1);
+  }
+  const region = targets.regions.find((r) => r.code.toLowerCase() === regionCode.toLowerCase());
+  if (!region) {
+    console.error(`No region "${regionCode}" in targets.json. Known: ${targets.regions.map((r) => r.code).join(", ")}`);
+    process.exit(1);
+  }
+
   const verticals = onlyVertical
     ? targets.verticals.filter((v) => v.key === onlyVertical)
     : targets.verticals;
   const cities = onlyCity
-    ? targets.cities.filter((c) => c.toLowerCase() === onlyCity.toLowerCase())
-    : targets.cities;
+    ? region.cities.filter((c) => c.toLowerCase() === onlyCity.toLowerCase())
+    : region.cities;
 
   if (verticals.length === 0) {
     console.error(`No vertical matches "${onlyVertical}". Keys: ${targets.verticals.map((v) => v.key).join(", ")}`);
     process.exit(1);
   }
+  if (cities.length === 0) {
+    console.error(`No city matches "${onlyCity}" in ${region.code}.`);
+    process.exit(1);
+  }
+
+  // Cost before spend. Text Search bills PER REQUEST, not per result, and each
+  // query can page up to 3 times - so this is the ceiling, not the estimate.
+  const queries = verticals.reduce((n, v) => n + v.queries.length, 0) * cities.length;
+  const maxRequests = queries * 3;
+  console.log(
+    `${region.name} (${region.code}) - ${verticals.length} verticals x ${cities.length} cities ` +
+    `= ${queries} queries, up to ${maxRequests} Places requests ` +
+    `(about $${(maxRequests * 0.035).toFixed(2)} at $35/1k).\n`
+  );
+  if (dryRun) {
+    const held = verticals.filter((v) => v.compliance_hold).map((v) => v.key);
+    console.log(`Held on ingest: ${held.length ? held.join(", ") : "none"}`);
+    console.log("Dry run - nothing called, nothing written.");
+    return;
+  }
+
+  // Fail here rather than after spending the money.
+  const regionId = await resolveRegionId(region);
+  console.log(`Region ${region.code} resolved to ${regionId}\n`);
 
   for (const v of targets.verticals) verticalWeightCache.set(v.key, v.weight);
 
@@ -67,8 +108,10 @@ async function main() {
           if (p.businessStatus && p.businessStatus !== "OPERATIONAL") continue;
           // Google sometimes ignores the state qualifier and returns
           // name-matched cities elsewhere (Peoria IL, Glendale CA, Mesa WA).
-          // Arizona only.
-          if (!/,\s*AZ\b/.test(p.formattedAddress ?? "")) continue;
+          // This used to be hardcoded to AZ, which silently discarded every
+          // result outside Arizona - a Texas scrape would have finished with
+          // zero rows and no error. Now it comes from the region.
+          if (!new RegExp(`,\\s*${region.state}\\b`).test(p.formattedAddress ?? "")) continue;
 
           const partial = {
             place_id: p.id,
@@ -89,6 +132,9 @@ async function main() {
             vertical_label: vertical.label,
             source_query: textQuery,
             scraped_at: now,
+            region_id: regionId,
+            compliance_hold: vertical.compliance_hold === true,
+            compliance_reason: vertical.compliance_hold ? (vertical.compliance_reason ?? "Restricted vertical") : null,
           };
           byPlaceId.set(p.id, {
             ...partial,
@@ -140,13 +186,15 @@ async function main() {
   mkdirSync(join(ROOT, "out"), { recursive: true });
   const stamp = now.slice(0, 10);
   const suffix = onlyVertical ? `-${onlyVertical}` : "";
-  const csvPath = join(ROOT, "out", `nectarpay-leads-${stamp}${suffix}.csv`);
+  const csvPath = join(ROOT, "out", `nectarpay-leads-${stamp}-${region.code.toLowerCase()}${suffix}.csv`);
   writeCsv(csvPath, leads);
   console.log(`CSV written: ${csvPath}`);
 
   const hot = leads.filter((l) => l.band === "HOT").length;
   const warm = leads.filter((l) => l.band === "WARM").length;
   console.log(`Bands: ${hot} HOT / ${warm} WARM / ${leads.length - hot - warm} COOL`);
+  const heldCount = leads.filter((l) => l.compliance_hold).length;
+  if (heldCount > 0) console.log(`${heldCount} leads held on ingest and will never be emailed.`);
 
   await upsertLeads(leads, { includeEnrichment: !skipEnrich });
 }
