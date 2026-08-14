@@ -407,6 +407,35 @@
         "bicycle repair"
       ],
       "compliance_hold": false
+    },
+    {
+      "key": "dental-vet",
+      "label": "Dental & Veterinary",
+      "weight": 8,
+      "queries": [
+        "veterinarian",
+        "emergency vet clinic",
+        "animal hospital",
+        "cash pay dentist",
+        "dental implants",
+        "cosmetic dentistry",
+        "orthodontist",
+        "denture clinic"
+      ],
+      "compliance_hold": false
+    },
+    {
+      "key": "event-venue",
+      "label": "Event Venues",
+      "weight": 8,
+      "queries": [
+        "event venue",
+        "wedding venue",
+        "banquet hall",
+        "event space rental",
+        "reception hall"
+      ],
+      "compliance_hold": false
     }
   ]
 }
