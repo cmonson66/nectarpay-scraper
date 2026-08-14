@@ -81,10 +81,24 @@ async function main() {
   );
   if (dryRun) {
     const held = verticals.filter((v) => v.compliance_hold).map((v) => v.key);
-    console.log(`Held on ingest: ${held.length ? held.join(", ") : "none"}`);
+    console.log(`Verticals held outright: ${held.length ? held.join(", ") : "none"}`);
+    console.log(`Name keywords also held: ${(targets.hold_keywords?.terms ?? []).length} terms`);
     console.log("Dry run - nothing called, nothing written.");
     return;
   }
+
+  // The hold has two layers, because the Phoenix pool proved one is not
+  // enough: four verticals are held outright (1,664 leads), but another 35
+  // were held one at a time because Google filed a kava bar under food-drink
+  // and a CBD storefront under gym-supps. The vertical rule never sees those,
+  // so the business NAME gets checked too.
+  const holdTerms = (targets.hold_keywords?.terms ?? []).map((t) => t.toLowerCase());
+  const holdTermReason = targets.hold_keywords?.reason ?? "Restricted product in business name";
+  const nameHold = (name: string): string | null => {
+    const n = name.toLowerCase();
+    const hit = holdTerms.find((t) => n.includes(t));
+    return hit ? `${holdTermReason}: ${hit}` : null;
+  };
 
   // Fail here rather than after spending the money.
   const regionId = await resolveRegionId(region);
@@ -133,8 +147,18 @@ async function main() {
             source_query: textQuery,
             scraped_at: now,
             region_id: regionId,
-            compliance_hold: vertical.compliance_hold === true,
-            compliance_reason: vertical.compliance_hold ? (vertical.compliance_reason ?? "Restricted vertical") : null,
+            ...(() => {
+              const byName = nameHold(p.displayName?.text ?? "");
+              const held = vertical.compliance_hold === true || byName !== null;
+              return {
+                compliance_hold: held,
+                compliance_reason: !held
+                  ? null
+                  : vertical.compliance_hold
+                    ? (vertical.compliance_reason ?? "Restricted vertical")
+                    : byName,
+              };
+            })(),
           };
           byPlaceId.set(p.id, {
             ...partial,
@@ -194,7 +218,17 @@ async function main() {
   const warm = leads.filter((l) => l.band === "WARM").length;
   console.log(`Bands: ${hot} HOT / ${warm} WARM / ${leads.length - hot - warm} COOL`);
   const heldCount = leads.filter((l) => l.compliance_hold).length;
-  if (heldCount > 0) console.log(`${heldCount} leads held on ingest and will never be emailed.`);
+  if (heldCount > 0) {
+    const byName = leads.filter(
+      (l) => l.compliance_hold && !verticals.find((v) => v.key === l.vertical)?.compliance_hold
+    );
+    console.log(`${heldCount} leads held on ingest and will never be emailed.`);
+    if (byName.length > 0) {
+      console.log(`  ${byName.length} of those were caught by NAME inside an otherwise clean vertical:`);
+      for (const l of byName.slice(0, 15)) console.log(`    ${l.vertical.padEnd(16)} ${l.name}`);
+      if (byName.length > 15) console.log(`    ...and ${byName.length - 15} more (see the CSV)`);
+    }
+  }
 
   await upsertLeads(leads, { includeEnrichment: !skipEnrich });
 }

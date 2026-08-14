@@ -17,8 +17,16 @@ export type RegionTarget = {
   cities: string[];
 };
 
+export type HoldKeywords = {
+  reason: string;
+  /** Matched case-insensitively against the business NAME, whatever vertical
+   *  Google filed it under. */
+  terms: string[];
+};
+
 export type Targets = {
   regions: RegionTarget[];
+  hold_keywords?: HoldKeywords;
   verticals: Vertical[];
 };
 

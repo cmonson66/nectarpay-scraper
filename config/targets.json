@@ -79,6 +79,42 @@
       ]
     }
   ],
+  "hold_keywords": {
+    "reason": "Restricted product detected in business name",
+    "terms": [
+      "kava",
+      "kratom",
+      "cbd",
+      "hemp",
+      "thc",
+      "delta 8",
+      "delta-8",
+      "delta 9",
+      "delta-9",
+      "cannabis",
+      "marijuana",
+      "dispensary",
+      "smoke shop",
+      "smokeshop",
+      "head shop",
+      "vape",
+      "vapor",
+      "e-cig",
+      "e cig",
+      "hookah",
+      "shisha",
+      "cigar",
+      "tobacco",
+      "420",
+      "adult video",
+      "adult store",
+      "adult superstore",
+      "adult boutique",
+      "sex shop",
+      "lingerie",
+      "novelties"
+    ]
+  },
   "verticals": [
     {
       "key": "smoke-vape",
@@ -189,7 +225,8 @@
         "hookah lounge",
         "tobacco shop"
       ],
-      "compliance_hold": false
+      "compliance_hold": true,
+      "compliance_reason": "Tobacco retail - restricted by Plaid"
     },
     {
       "key": "pawn",
