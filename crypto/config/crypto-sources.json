@@ -1,5 +1,223 @@
 {
-  "_comment": "Edit freely. Cities mirror the scraper's AZ sweep; radiusM is the Places locationBias radius (max 50000).",
+  "_comment": "Region-scoped. Each region carries the bounding box used to reject Google's out-of-state name matches and to scope the Overpass query, plus its own sweep cities. bbox is METRO-tight on purpose: a state-wide Texas box would pull Houston and San Antonio signals into DFW's density.",
+  "regions": {
+    "PHX": {
+      "name": "Phoenix",
+      "bbox": {
+        "south": 31.2,
+        "west": -115.0,
+        "north": 37.05,
+        "east": -108.95
+      },
+      "refLat": 33.4,
+      "cities": [
+        {
+          "name": "Phoenix",
+          "lat": 33.4484,
+          "lng": -112.074,
+          "radiusM": 30000
+        },
+        {
+          "name": "Mesa",
+          "lat": 33.4152,
+          "lng": -111.8315,
+          "radiusM": 18000
+        },
+        {
+          "name": "Chandler",
+          "lat": 33.3062,
+          "lng": -111.8413,
+          "radiusM": 15000
+        },
+        {
+          "name": "Gilbert",
+          "lat": 33.3528,
+          "lng": -111.789,
+          "radiusM": 15000
+        },
+        {
+          "name": "Glendale",
+          "lat": 33.5387,
+          "lng": -112.186,
+          "radiusM": 15000
+        },
+        {
+          "name": "Scottsdale",
+          "lat": 33.4942,
+          "lng": -111.9261,
+          "radiusM": 20000
+        },
+        {
+          "name": "Tempe",
+          "lat": 33.4255,
+          "lng": -111.94,
+          "radiusM": 12000
+        },
+        {
+          "name": "Peoria",
+          "lat": 33.5806,
+          "lng": -112.2374,
+          "radiusM": 18000
+        },
+        {
+          "name": "Surprise",
+          "lat": 33.6292,
+          "lng": -112.368,
+          "radiusM": 15000
+        },
+        {
+          "name": "Goodyear",
+          "lat": 33.4353,
+          "lng": -112.3576,
+          "radiusM": 15000
+        },
+        {
+          "name": "Avondale",
+          "lat": 33.4356,
+          "lng": -112.3496,
+          "radiusM": 12000
+        },
+        {
+          "name": "Buckeye",
+          "lat": 33.3703,
+          "lng": -112.5838,
+          "radiusM": 18000
+        },
+        {
+          "name": "Queen Creek",
+          "lat": 33.2487,
+          "lng": -111.6343,
+          "radiusM": 15000
+        },
+        {
+          "name": "Tucson",
+          "lat": 32.2226,
+          "lng": -110.9747,
+          "radiusM": 30000
+        },
+        {
+          "name": "Flagstaff",
+          "lat": 35.1983,
+          "lng": -111.6513,
+          "radiusM": 20000
+        },
+        {
+          "name": "Prescott",
+          "lat": 34.54,
+          "lng": -112.4685,
+          "radiusM": 25000
+        }
+      ]
+    },
+    "DFW": {
+      "name": "Dallas / Fort Worth",
+      "bbox": {
+        "south": 32.35,
+        "west": -97.65,
+        "north": 33.45,
+        "east": -96.25
+      },
+      "refLat": 32.8,
+      "cities": [
+        {
+          "name": "Dallas",
+          "lat": 32.7767,
+          "lng": -96.797,
+          "radiusM": 30000
+        },
+        {
+          "name": "Fort Worth",
+          "lat": 32.7555,
+          "lng": -97.3308,
+          "radiusM": 25000
+        },
+        {
+          "name": "Arlington",
+          "lat": 32.7357,
+          "lng": -97.1081,
+          "radiusM": 15000
+        },
+        {
+          "name": "Plano",
+          "lat": 33.0198,
+          "lng": -96.6989,
+          "radiusM": 15000
+        },
+        {
+          "name": "Irving",
+          "lat": 32.814,
+          "lng": -96.9489,
+          "radiusM": 12000
+        },
+        {
+          "name": "Garland",
+          "lat": 32.9126,
+          "lng": -96.6389,
+          "radiusM": 12000
+        },
+        {
+          "name": "Frisco",
+          "lat": 33.1507,
+          "lng": -96.8236,
+          "radiusM": 12000
+        },
+        {
+          "name": "McKinney",
+          "lat": 33.1972,
+          "lng": -96.6398,
+          "radiusM": 12000
+        },
+        {
+          "name": "Denton",
+          "lat": 33.2148,
+          "lng": -97.1331,
+          "radiusM": 15000
+        },
+        {
+          "name": "Mesquite",
+          "lat": 32.7668,
+          "lng": -96.5992,
+          "radiusM": 10000
+        },
+        {
+          "name": "Grand Prairie",
+          "lat": 32.746,
+          "lng": -96.9978,
+          "radiusM": 10000
+        },
+        {
+          "name": "Carrollton",
+          "lat": 32.9537,
+          "lng": -96.8903,
+          "radiusM": 10000
+        },
+        {
+          "name": "Richardson",
+          "lat": 32.9483,
+          "lng": -96.7299,
+          "radiusM": 8000
+        },
+        {
+          "name": "Lewisville",
+          "lat": 33.0462,
+          "lng": -96.9942,
+          "radiusM": 10000
+        },
+        {
+          "name": "Allen",
+          "lat": 33.1032,
+          "lng": -96.6706,
+          "radiusM": 8000
+        },
+        {
+          "name": "Euless",
+          "lat": 32.8371,
+          "lng": -97.0819,
+          "radiusM": 8000
+        }
+      ]
+    }
+  },
   "queries": [
     "bitcoin atm",
     "crypto atm",
@@ -14,104 +232,6 @@
     "Bitstop",
     "Byte Federal",
     "Coinhub bitcoin atm"
-  ],
-  "cities": [
-    {
-      "name": "Phoenix",
-      "lat": 33.4484,
-      "lng": -112.074,
-      "radiusM": 30000
-    },
-    {
-      "name": "Mesa",
-      "lat": 33.4152,
-      "lng": -111.8315,
-      "radiusM": 18000
-    },
-    {
-      "name": "Chandler",
-      "lat": 33.3062,
-      "lng": -111.8413,
-      "radiusM": 15000
-    },
-    {
-      "name": "Gilbert",
-      "lat": 33.3528,
-      "lng": -111.789,
-      "radiusM": 15000
-    },
-    {
-      "name": "Glendale",
-      "lat": 33.5387,
-      "lng": -112.186,
-      "radiusM": 15000
-    },
-    {
-      "name": "Scottsdale",
-      "lat": 33.4942,
-      "lng": -111.9261,
-      "radiusM": 20000
-    },
-    {
-      "name": "Tempe",
-      "lat": 33.4255,
-      "lng": -111.94,
-      "radiusM": 12000
-    },
-    {
-      "name": "Peoria",
-      "lat": 33.5806,
-      "lng": -112.2374,
-      "radiusM": 18000
-    },
-    {
-      "name": "Surprise",
-      "lat": 33.6292,
-      "lng": -112.368,
-      "radiusM": 15000
-    },
-    {
-      "name": "Goodyear",
-      "lat": 33.4353,
-      "lng": -112.3576,
-      "radiusM": 15000
-    },
-    {
-      "name": "Avondale",
-      "lat": 33.4356,
-      "lng": -112.3496,
-      "radiusM": 12000
-    },
-    {
-      "name": "Buckeye",
-      "lat": 33.3703,
-      "lng": -112.5838,
-      "radiusM": 18000
-    },
-    {
-      "name": "Queen Creek",
-      "lat": 33.2487,
-      "lng": -111.6343,
-      "radiusM": 15000
-    },
-    {
-      "name": "Tucson",
-      "lat": 32.2226,
-      "lng": -110.9747,
-      "radiusM": 30000
-    },
-    {
-      "name": "Flagstaff",
-      "lat": 35.1983,
-      "lng": -111.6513,
-      "radiusM": 20000
-    },
-    {
-      "name": "Prescott",
-      "lat": 34.54,
-      "lng": -112.4685,
-      "radiusM": 25000
-    }
   ],
   "atmBrands": [
     "america bitcoin",

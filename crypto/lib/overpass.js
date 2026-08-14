@@ -1,4 +1,3 @@
-import { AZ_BBOX } from './geo.js';
 
 // BTC Map is a rendering layer over OpenStreetMap tags, so querying OSM
 // directly via Overpass gives the same dataset, bbox-filtered, no key, no
@@ -17,7 +16,8 @@ const USER_AGENT = 'nectarpay-crypto-signals/1.0 (solo dev; contact via repo)';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export function buildQuery(bbox = AZ_BBOX) {
+export function buildQuery(bbox) {
+  if (!bbox) throw new Error('buildQuery needs a region bbox');
   const b = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
   return `
 [out:json][timeout:180];
@@ -58,7 +58,7 @@ async function attempt(url, query, timeoutMs) {
   }
 }
 
-export async function fetchOsmCryptoPlaces({ bbox = AZ_BBOX, timeoutMs = 190000, rounds = 2 } = {}) {
+export async function fetchOsmCryptoPlaces({ bbox, timeoutMs = 190000, rounds = 2 } = {}) {
   const query = buildQuery(bbox);
   let lastErr;
 

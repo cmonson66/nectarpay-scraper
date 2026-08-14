@@ -6,10 +6,16 @@
  * (0-100) back via the apply_crypto_scores RPC, which touches only the five
  * crypto_* columns. Nothing else on the row can be modified by this script.
  *
+ * SCORED PER REGION, and --region is required. crypto_score is a PERCENTILE
+ * within the dataset, so scoring two metros together silently re-ranks both:
+ * a Phoenix lead's 80 would start meaning "80th percentile across Arizona and
+ * Texas", and every existing Phoenix score would shift the first time DFW
+ * signals landed. Each region is ranked against itself.
+ *
  * Usage (PowerShell, from the repo root):
- *   node crypto/score.js --dry-run
- *   node crypto/score.js
- *   node crypto/score.js --radius=3200
+ *   node crypto/score.js --region=DFW --dry-run
+ *   node crypto/score.js --region=DFW
+ *   node crypto/score.js --region=PHX --radius=3200
  */
 
 import fs from 'node:fs';
@@ -34,6 +40,18 @@ const val = (name, dflt) => {
 const CONFIG = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'config', 'crypto-sources.json'), 'utf8')
 );
+
+const REGION_CODE = (val('region', '') || '').toUpperCase();
+const KNOWN = Object.keys(CONFIG.regions);
+if (!REGION_CODE) {
+  console.error(`--region=CODE is required. Known: ${KNOWN.join(', ')}`);
+  process.exit(1);
+}
+const REGION = CONFIG.regions[REGION_CODE];
+if (!REGION) {
+  console.error(`No region "${REGION_CODE}" in crypto-sources.json. Known: ${KNOWN.join(', ')}`);
+  process.exit(1);
+}
 
 const RADIUS_M = Number(val('radius', CONFIG.scoring.radiusM));
 const { atmWeight, merchantWeight, falloffPower } = CONFIG.scoring;
@@ -72,14 +90,25 @@ function percentileRanks(values) {
 
 (async function main() {
   console.log(`\nNectarPay crypto scoring${DRY_RUN ? '  [DRY RUN - no writes]' : ''}`);
+  console.log(`region: ${REGION_CODE} (${REGION.name})`);
   console.log(`radius: ${RADIUS_M}m   atm:${atmWeight}  merchant:${merchantWeight}\n`);
 
   const supabase = getSupabase();
 
-  const signals = await fetchAll(supabase, 'crypto_signals', 'id,signal_type,lat,lng,weight');
-  console.log(`Loaded ${signals.length} crypto signals`);
+  const { data: regionRows, error: regionErr } = await supabase
+    .from('regions').select('id, is_active').eq('code', REGION_CODE);
+  if (regionErr) throw new Error(`Could not read regions: ${regionErr.message}`);
+  if (!regionRows || regionRows.length !== 1) {
+    throw new Error(`Expected exactly one region with code ${REGION_CODE}, found ${regionRows?.length ?? 0}.`);
+  }
+  const regionId = regionRows[0].id;
+
+  const signals = await fetchAll(supabase, 'crypto_signals', 'id,signal_type,lat,lng,weight', {
+    filter: (q) => q.eq('region_id', regionId),
+  });
+  console.log(`Loaded ${signals.length} crypto signals in ${REGION_CODE}`);
   if (signals.length === 0) {
-    console.log('No signals in the table. Run crypto/ingest.js first.');
+    console.log(`No signals for ${REGION_CODE}. Run: node crypto/ingest.js --region=${REGION_CODE}`);
     return;
   }
 
@@ -108,7 +137,10 @@ function percentileRanks(values) {
       ];
       for (const cols of attempts) {
         try {
-          const rows = await fetchAll(supabase, LEADS_TABLE, cols, { orderBy: 'place_id' });
+          const rows = await fetchAll(supabase, LEADS_TABLE, cols, {
+            orderBy: 'place_id',
+            filter: (q) => q.eq('region_id', regionId),
+          });
           console.log(`Columns: place_id + ${latCol}/${lngCol}${cols.includes(EXTRAS) ? ' + name/city/vertical' : ''}`);
           return rows.map((r) => ({ ...r, lat: Number(r[latCol]), lng: Number(r[lngCol]) }));
         } catch (err) {
@@ -129,7 +161,7 @@ function percentileRanks(values) {
   const geocoded = leads.filter((l) => l.place_id && Number.isFinite(l.lat) && Number.isFinite(l.lng));
   console.log(`Loaded ${leads.length} leads (${geocoded.length} with coordinates)\n`);
 
-  const grid = new GridIndex(RADIUS_M);
+  const grid = new GridIndex(RADIUS_M, REGION.refLat);
   for (const s of signals) grid.add(s);
 
   const scored = [];

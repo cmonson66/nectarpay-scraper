@@ -2,15 +2,19 @@
 /**
  * crypto/ingest.js
  *
- * Collects Arizona crypto touchpoints into the crypto_signals table:
+ * Collects one REGION's crypto touchpoints into the crypto_signals table:
  *   - crypto ATMs        via Google Places API (New) Text Search
  *   - accepting merchants via OpenStreetMap / Overpass (the BTC Map dataset)
  *
+ * --region is required. It picks the bounding box, the sweep cities, and the
+ * region_id stamped on every row. Without it a Texas sweep would have been
+ * rejected wholesale by a hardcoded Arizona box.
+ *
  * Usage (PowerShell, from the repo root):
- *   node crypto/ingest.js --dry-run
- *   node crypto/ingest.js
- *   node crypto/ingest.js --source=osm
- *   node crypto/ingest.js --source=places --no-brands
+ *   node crypto/ingest.js --region=DFW --dry-run
+ *   node crypto/ingest.js --region=DFW
+ *   node crypto/ingest.js --region=PHX --source=osm
+ *   node crypto/ingest.js --region=DFW --source=places --no-brands
  */
 
 import fs from 'node:fs';
@@ -22,7 +26,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { textSearch } from './lib/places.js';
 import { fetchOsmCryptoPlaces } from './lib/overpass.js';
 import { getSupabase, getPlacesKey, fetchAll } from './lib/db.js';
-import { inArizona, haversineMeters } from './lib/geo.js';
+import { inBox, haversineMeters } from './lib/geo.js';
 
 const args = process.argv.slice(2);
 const has = (f) => args.includes(f);
@@ -32,6 +36,7 @@ const val = (name, dflt) => {
 };
 
 const DRY_RUN = has('--dry-run');
+const REGION_CODE = (val('region', '') || '').toUpperCase();
 const SOURCE = val('source', 'all').toLowerCase();
 const CITIES_FROM_LEADS = has('--cities-from-leads');
 const LEADS_TABLE = 'nectarpay_leads';
@@ -41,6 +46,18 @@ const OUT_DIR = path.join(process.cwd(), 'out');
 const CONFIG = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'config', 'crypto-sources.json'), 'utf8')
 );
+
+const KNOWN = Object.keys(CONFIG.regions);
+if (!REGION_CODE) {
+  console.error(`--region=CODE is required. Known: ${KNOWN.join(', ')}`);
+  process.exit(1);
+}
+const REGION = CONFIG.regions[REGION_CODE];
+if (!REGION) {
+  console.error(`No region "${REGION_CODE}" in crypto-sources.json. Known: ${KNOWN.join(', ')}`);
+  process.exit(1);
+}
+const BBOX = REGION.bbox;
 
 // ---------------------------------------------------------------------------
 
@@ -82,6 +99,19 @@ function atmWeightFor(name) {
   return CONFIG.counterServiceBrands.some((b) => n.includes(b))
     ? CONFIG.scoring.counterServiceWeight
     : CONFIG.scoring.atmWeight;
+}
+
+/** Region CODE -> the CRM's regions.id. Fails loudly before any API spend. */
+async function resolveRegionId(code) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from('regions').select('id, is_active').eq('code', code);
+  if (error) throw new Error(`Could not read regions: ${error.message}`);
+  if (!data || data.length === 0) {
+    throw new Error(`No region with code ${code} in the CRM. Create it on the Regions page first.`);
+  }
+  if (data.length > 1) throw new Error(`${data.length} regions share the code ${code}.`);
+  if (!data[0].is_active) console.warn(`  ! Region ${code} is turned off in the CRM. Ingesting anyway.`);
+  return data[0].id;
 }
 
 function cityFromAddress(addr) {
@@ -166,7 +196,7 @@ async function collectPlaces(cities) {
       for (const p of places) {
         const lat = p.location?.latitude;
         const lng = p.location?.longitude;
-        if (!inArizona(lat, lng)) continue; // reject out-of-state name matches
+        if (!inBox(BBOX, lat, lng)) continue; // reject out-of-region name matches
         if (p.businessStatus === 'CLOSED_PERMANENTLY') continue;
 
         const name = p.displayName?.text || null;
@@ -217,13 +247,13 @@ async function collectPlaces(cities) {
 }
 
 async function collectOsm() {
-  const elements = await fetchOsmCryptoPlaces();
+  const elements = await fetchOsmCryptoPlaces({ bbox: BBOX });
   const rows = [];
 
   for (const el of elements) {
     const lat = el.lat ?? el.center?.lat;
     const lng = el.lon ?? el.center?.lon;
-    if (!inArizona(lat, lng)) continue;
+    if (!inBox(BBOX, lat, lng)) continue;
 
     const tags = el.tags || {};
     const name = tags.name || tags.operator || null;
@@ -249,7 +279,7 @@ async function collectOsm() {
   }
 
   const atms = rows.filter((r) => r.signal_type === 'atm').length;
-  console.log(`  -> ${rows.length} OSM crypto places in AZ (${atms} ATM, ${rows.length - atms} merchant)`);
+  console.log(`  -> ${rows.length} OSM crypto places in ${REGION_CODE} (${atms} ATM, ${rows.length - atms} merchant)`);
   return rows;
 }
 
@@ -276,7 +306,7 @@ function dedupeCrossSource(rows) {
 
 function writeCsv(rows) {
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const file = path.join(OUT_DIR, 'crypto-signals.csv');
+  const file = path.join(OUT_DIR, `crypto-signals-${REGION_CODE.toLowerCase()}.csv`);
   const cols = ['source', 'source_id', 'signal_type', 'name', 'brand', 'address', 'city', 'lat', 'lng', 'weight'];
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n');
@@ -304,12 +334,19 @@ async function upsert(rows) {
 
 (async function main() {
   console.log(`\nNectarPay crypto signal ingest${DRY_RUN ? '  [DRY RUN - no writes]' : ''}`);
-  console.log(`source: ${SOURCE}\n`);
+  console.log(`region: ${REGION_CODE} (${REGION.name})   source: ${SOURCE}`);
+  console.log(`bbox:   ${BBOX.south},${BBOX.west} to ${BBOX.north},${BBOX.east}\n`);
+
+  // Resolved before any spend, and before OSM. A signal with no region is
+  // invisible to the region map and pollutes the other region's density
+  // percentiles, which is the quiet version of this going wrong.
+  const regionId = DRY_RUN ? null : await resolveRegionId(REGION_CODE);
+  if (regionId) console.log(`region_id: ${regionId}\n`);
 
   let rows = [];
 
   if (SOURCE === 'all' || SOURCE === 'places') {
-    let cities = CONFIG.cities;
+    let cities = REGION.cities;
     if (CITIES_FROM_LEADS) {
       console.log(`Deriving sweep list from ${LEADS_TABLE}`);
       cities = await citiesFromLeads();
@@ -334,6 +371,7 @@ async function upsert(rows) {
   }
 
   rows = dedupeCrossSource(rows);
+  for (const r of rows) r.region_id = regionId;
 
   const atms = rows.filter((r) => r.signal_type === 'atm').length;
   console.log(`\nTotal: ${rows.length} signals  (${atms} ATM, ${rows.length - atms} merchant)`);
@@ -356,7 +394,7 @@ async function upsert(rows) {
 
   writeCsv(rows);
   await upsert(rows);
-  console.log('\nDone. Next: node crypto/score.js --dry-run');
+  console.log(`\nDone. Next: node crypto/score.js --region=${REGION_CODE} --dry-run`);
 })().catch((err) => {
   console.error(`\nFAILED: ${err.message}`);
   process.exit(1);

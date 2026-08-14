@@ -1,18 +1,18 @@
 export const R_EARTH_M = 6371008.8;
 export const toRad = (d) => (d * Math.PI) / 180;
 
-// Arizona bounding box. Used to reject Google's name-matched out-of-state
-// hits (the Peoria IL problem) before anything reaches the database.
-export const AZ_BBOX = { south: 31.2, west: -115.0, north: 37.05, east: -108.95 };
-
-export function inArizona(lat, lng) {
+// Rejects Google's name-matched out-of-region hits (the Peoria IL problem)
+// before anything reaches the database. The box comes from the region config
+// now - it used to be a hardcoded Arizona constant, which meant a Texas sweep
+// would have discarded every single result it paid for.
+export function inBox(bbox, lat, lng) {
   return (
     Number.isFinite(lat) &&
     Number.isFinite(lng) &&
-    lat >= AZ_BBOX.south &&
-    lat <= AZ_BBOX.north &&
-    lng >= AZ_BBOX.west &&
-    lng <= AZ_BBOX.east
+    lat >= bbox.south &&
+    lat <= bbox.north &&
+    lng >= bbox.west &&
+    lng <= bbox.east
   );
 }
 
@@ -32,6 +32,8 @@ export function haversineMeters(aLat, aLng, bLat, bLng) {
  * that finishes in a couple of seconds on 10k leads.
  */
 export class GridIndex {
+  // refLat sets the longitude scale, so it must match the region being
+  // indexed. Phoenix is 33.4, DFW is 32.8 - small, but free to get right.
   constructor(cellMeters, refLat = 33.4) {
     this.cellLat = cellMeters / 111320;
     this.cellLng = cellMeters / (111320 * Math.cos(toRad(refLat)));
